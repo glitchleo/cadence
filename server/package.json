@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --env-file=.env --test tests/**/*.test.js"
+    "test": "node --env-file=.env --test tests/**/*.test.js",
+    "migrate:create": "node-pg-migrate create --migrations-dir migrations --migration-file-language sql --migration-filename-format utc",
+    "migrate:up": "node --env-file=.env scripts/migrate.js up",
+    "migrate:down": "node --env-file=.env scripts/migrate.js down",
+    "migrate:redo": "node --env-file=.env scripts/migrate.js redo"
   },
   "keywords": [],
   "author": "",
