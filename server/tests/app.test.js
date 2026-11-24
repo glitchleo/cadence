@@ -1,22 +1,26 @@
-import { describe, it } from "node:test";
+import { describe, it, after } from "node:test";
 import assert from "node:assert/strict";
 import express from "express";
 import request from "supertest";
 import { createApp } from "../src/app.js";
+import { closeDbPool } from "../src/config/db.js";
 
 describe("Express App Factory (src/app.js)", () => {
-  it("responds 200 OK on GET /api/v1/status without binding a fixed port", async () => {
+  after(async () => {
+    await closeDbPool();
+  });
+  it("responds 200 OK on GET /api/v1/health without binding a fixed port", async () => {
     const app = createApp();
-    const res = await request(app).get("/api/v1/status");
+    const res = await request(app).get("/api/v1/health");
 
     assert.equal(res.status, 200);
-    assert.equal(res.body.status, "ok");
-    assert.equal(res.body.service, "cadence-api");
+    assert.equal(res.body.success, true);
+    assert.equal(res.body.data.status, "ok");
   });
 
   it("hides the X-Powered-By Express fingerprint header", async () => {
     const app = createApp();
-    const res = await request(app).get("/api/v1/status");
+    const res = await request(app).get("/api/v1/health");
 
     assert.equal(res.headers["x-powered-by"], undefined);
   });
@@ -43,8 +47,8 @@ describe("Express App Factory (src/app.js)", () => {
     const appB = createApp();
 
     const [resA, resB] = await Promise.all([
-      request(appA).get("/api/v1/status"),
-      request(appB).get("/api/v1/status"),
+      request(appA).get("/api/v1/health"),
+      request(appB).get("/api/v1/health"),
     ]);
 
     assert.equal(resA.status, 200);
